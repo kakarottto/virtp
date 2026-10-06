@@ -5,7 +5,7 @@ BUILD_DIR := build
 SRCS := $(shell find $(SRC_DIR) -type f -name "*.cpp")
 OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
 CFLAGS := -I$(INC_DIR) -Wall -Wextra -O2
-LDLIBS := -lSDL2 -lSDL2_mixer
+LDLIBS := -lSDL3 -lSDL3_image
 TARGET := windy
 
 all: $(TARGET)

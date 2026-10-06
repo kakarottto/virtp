@@ -1,62 +1,129 @@
-#include <cstdio>
-#include <cstdlib>
-
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_mixer.h"
-
-static const char *MY_COOL_MP3 =
-    "./res/Rainbow - I Surrender (Remastered) (SHM-CD).mp3";
-
-int main(int argc, char **argv)
+#include<SDL3/SDL.h>
+#include<SDL3_image/SDL_image.h>
+#include<string>
+#include <window.h>
+#include <iostream>
+/*
+void start()
 {
-    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-        printf("SDL_Init failed: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    if ((Mix_Init(MIX_INIT_MP3) & MIX_INIT_MP3) != MIX_INIT_MP3) {
-        printf("Mix_Init failed: %s\n", Mix_GetError());
-        SDL_Quit();
-        return 1;
-    }
-
-    if (Mix_OpenAudio(22050, AUDIO_S16SYS, 2, 640) < 0) {
-        printf("Mix_OpenAudio failed: %s\n", Mix_GetError());
-        Mix_Quit();
-        SDL_Quit();
-        return 1;
-    }
-
-    Mix_Music *music = Mix_LoadMUS(MY_COOL_MP3);
-
-    if (!music) {
-        printf("Mix_LoadMUS failed: %s\n", Mix_GetError());
-        Mix_CloseAudio();
-        Mix_Quit();
-        SDL_Quit();
-        return 1;
-    }
-
-    if (Mix_PlayMusic(music, 1) < 0) {
-        printf("Mix_PlayMusic failed: %s\n", Mix_GetError());
-        Mix_FreeMusic(music);
-        Mix_CloseAudio();
-        Mix_Quit();
-        SDL_Quit();
-        return 1;
-    }
-
-    printf("Playing: %s\n", MY_COOL_MP3);
-
-    while (!SDL_QuitRequested() && Mix_PlayingMusic()) {
-        SDL_Delay(250);
-    }
-
-    Mix_FreeMusic(music);
-    Mix_CloseAudio();
-    Mix_Quit();
-    SDL_Quit();
-
-    return 0;
+	if(!SDL_Init(SDL_INIT_VIDEO))
+	{
+		SDL_Log("SDL_Init failed: %s", SDL_GetError());
+		return;
+	}
+	std::string title="example title";
+	unsigned int width=800, height = 600;
+	//https://wiki.libsdl.org/SDL3/SDL_CreateWindow
+	SDL_Window* window=SDL_CreateWindow(title.c_str(),width,height,SDL_WINDOW_BORDERLESS|SDL_WINDOW_MOUSE_FOCUS|SDL_WINDOW_INPUT_FOCUS);
+	if(window==nullptr)
+	{
+		SDL_Log("SDL_CreateWindow failed: %s", SDL_GetError());
+		SDL_Quit();
+		return;
+	}
+	
+	SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
+	if(renderer==nullptr)
+	{
+		SDL_Log("SDL_CreateRenderer failed: %s", SDL_GetError());
+	}
+	
+	SDL_Texture* texture = IMG_LoadTexture(renderer,"./res/example.png");
+	if(texture == nullptr)
+	{
+		SDL_Log("IMG_LoadTexture failed: %s", SDL_GetError());
+	}
+	
+	bool running = true;
+	SDL_Event event;
+	while(running)
+	{
+		//upadte
+		while(SDL_PollEvent(&event))
+		{
+			if(event.type==SDL_EVENT_QUIT) running = false;
+			if(event.type == SDL_EVENT_KEY_DOWN)
+			{
+				if(event.key.key == SDLK_ESCAPE) running = false;
+			}
+		}
+		
+		//draw
+		SDL_SetRenderDrawColor(renderer,0,10,0,24);
+		SDL_RenderClear(renderer);
+		//https://wiki.libsdl.org/SDL3/SDL_RenderTexture
+		SDL_FRect dest = {200.0f,100.0f,400.0f,400.0f};
+		SDL_FRect src = {100,100,100,100};
+		SDL_RenderTexture(renderer,texture,&src,&dest);
+		
+		SDL_FRect sq = {300.0f,200.0f,200.0f,200.0f};
+		SDL_SetRenderDrawColor(renderer,100,0,140,24);
+		SDL_RenderFillRect(renderer,&sq);
+		SDL_RenderPresent(renderer);
+	}
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 }
+*/
 
+/*
+void start2()
+{
+	Window wi;
+	wi.CreateDefault("",600,600);
+	
+	if(!SDL_Init(SDL_INIT_VIDEO))
+	{
+		SDL_Log("SDL_Init failed: %s", SDL_GetError());
+	}
+	
+	bool running = true;
+	SDL_Event event;
+	SDL_Texture* texture = IMG_LoadTexture(wi.GetSDLRenderer(),"./res/example.png");
+	SDL_SetRenderDrawColor(wi.GetSDLRenderer(),0,10,0,255);
+	SDL_RenderClear(wi.GetSDLRenderer());
+	SDL_FRect dest = {200.0f,100.0f,400.0f,400.0f};
+	SDL_FRect src = {100,100,100,100};
+	SDL_RenderTexture(wi.GetSDLRenderer(),texture,&src,&dest);
+	
+	SDL_FRect sq = {300.0f,200.0f,200.0f,200.0f};
+	SDL_SetRenderDrawColor(wi.GetSDLRenderer(),100,0,140,255);
+	
+	SDL_RenderFillRect(wi.GetSDLRenderer(),&sq);
+	
+	SDL_RenderPresent(wi.GetSDLRenderer());
+	Window wi2;
+	wi2.Copy(&wi);
+	wi2.print();
+	int count;
+	SDL_Window** windows = SDL_GetWindows(&count);
+	std::cout<<count<<"\n";
+	SDL_free(windows);
+	
+	while(running)
+	{
+		//upadte
+		while(SDL_PollEvent(&event))
+		{
+			if(event.type==SDL_EVENT_QUIT) running = false;
+			if(event.type == SDL_EVENT_KEY_DOWN)
+			{
+				if(event.key.key == SDLK_ESCAPE) running = false;
+			}
+		}
+		
+		//draw
+		
+		SDL_RenderPresent(wi.GetSDLRenderer());
+		SDL_RenderPresent(wi2.GetSDLRenderer());
+	}
+	
+	SDL_Quit();
+}*/
+
+int main()
+{
+		
+	return 0;
+}
