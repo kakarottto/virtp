@@ -3,13 +3,19 @@
 #include<string>
 #include <window.h>
 #include <iostream>
-/*
+#include <SDL3_ttf/SDL_ttf.h>
+
 void start()
 {
+
 	if(!SDL_Init(SDL_INIT_VIDEO))
 	{
 		SDL_Log("SDL_Init failed: %s", SDL_GetError());
 		return;
+	}
+		if(!TTF_Init())
+	{
+		SDL_Log("TTF_Init failed: %s", SDL_GetError());
 	}
 	std::string title="example title";
 	unsigned int width=800, height = 600;
@@ -35,7 +41,23 @@ void start()
 	}
 	
 	bool running = true;
-	SDL_Event event;
+	//text logic
+	TTF_TextEngine *engine = TTF_CreateRendererTextEngine(renderer);
+	if(engine == nullptr)
+	{
+		SDL_Log("TTF_CreateRendererTextEngine failed: %s", SDL_GetError());
+	}
+	TTF_Font *font = TTF_OpenFont("./res/test.ttf", 44.0f);
+		if(font == nullptr)
+	{
+		SDL_Log("TTF_OpenFont failed: %s", SDL_GetError());
+	}
+
+	TTF_Text *text = TTF_CreateText(engine, font, "FUZ", 0);	SDL_Event event;
+		if(text == nullptr)
+	{
+		SDL_Log("IMG_CreateText failed: %s", SDL_GetError());
+	}
 	while(running)
 	{
 		//upadte
@@ -59,15 +81,21 @@ void start()
 		SDL_FRect sq = {300.0f,200.0f,200.0f,200.0f};
 		SDL_SetRenderDrawColor(renderer,100,0,140,24);
 		SDL_RenderFillRect(renderer,&sq);
+		TTF_DrawRendererText(text, 350, 250);
 		SDL_RenderPresent(renderer);
+		
+		
 	}
+	TTF_DestroyText(text);
+    TTF_CloseFont(font);
+    TTF_DestroyRendererTextEngine(engine);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
-*/
 
-/*
+
+
 void start2()
 {
 	Window wi;
@@ -120,10 +148,11 @@ void start2()
 	}
 	
 	SDL_Quit();
-}*/
+}
 
 int main()
 {
 		
+	start();
 	return 0;
 }
