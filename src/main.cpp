@@ -4,16 +4,26 @@
 #include <window.h>
 #include <iostream>
 #include <SDL3_ttf/SDL_ttf.h>
-
+#include <text.h>
+#include <fuelo.h>
+#include <fstream>
 void start()
 {
-
+	//fuelo stuff
+	/*
+	FueloData f;
+	f.Fetch();
+	std::cout<<f.GetResponse()<<"\n";
+	std::ofstream file("./res/fuelo.html");
+	file<<f.GetResponse();
+	file.close();
+	*/
 	if(!SDL_Init(SDL_INIT_VIDEO))
 	{
 		SDL_Log("SDL_Init failed: %s", SDL_GetError());
 		return;
 	}
-		if(!TTF_Init())
+	if(!TTF_Init())
 	{
 		SDL_Log("TTF_Init failed: %s", SDL_GetError());
 	}
@@ -53,11 +63,18 @@ void start()
 		SDL_Log("TTF_OpenFont failed: %s", SDL_GetError());
 	}
 
-	TTF_Text *text = TTF_CreateText(engine, font, "FUZ", 0);	SDL_Event event;
-		if(text == nullptr)
+	TTF_Text *text = TTF_CreateText(engine, font, "FUZ", 0);
+	if(text == nullptr)
 	{
 		SDL_Log("IMG_CreateText failed: %s", SDL_GetError());
 	}
+	Text t;
+	t.SetEngine(engine);
+	t.SetPos(600,400);
+	t.SetFont("./res/test.ttf");
+	t.SetSize(44.0f);
+	t.SetText("Hello");
+	SDL_Event event;
 	while(running)
 	{
 		//upadte
@@ -82,6 +99,7 @@ void start()
 		SDL_SetRenderDrawColor(renderer,100,0,140,24);
 		SDL_RenderFillRect(renderer,&sq);
 		TTF_DrawRendererText(text, 350, 250);
+		t.Draw();
 		SDL_RenderPresent(renderer);
 		
 		
@@ -154,5 +172,6 @@ int main()
 {
 		
 	start();
+	
 	return 0;
 }
