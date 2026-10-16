@@ -1,177 +1,106 @@
-#include<SDL3/SDL.h>
-#include<SDL3_image/SDL_image.h>
-#include<string>
-#include <window.h>
-#include <iostream>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include <text.h>
-#include <fuelo.h>
+#include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
+
+#include "window.h"
+#include "text.h"
+#include "fuelo.h"
+
 void start()
 {
-	//fuelo stuff
-	/*
-	FueloData f;
-	f.Fetch();
-	std::cout<<f.GetResponse()<<"\n";
-	std::ofstream file("./res/fuelo.html");
-	file<<f.GetResponse();
-	file.close();
-	*/
-	if(!SDL_Init(SDL_INIT_VIDEO))
-	{
-		SDL_Log("SDL_Init failed: %s", SDL_GetError());
-		return;
-	}
-	if(!TTF_Init())
-	{
-		SDL_Log("TTF_Init failed: %s", SDL_GetError());
-	}
-	std::string title="example title";
-	unsigned int width=800, height = 600;
-	//https://wiki.libsdl.org/SDL3/SDL_CreateWindow
-	SDL_Window* window=SDL_CreateWindow(title.c_str(),width,height,SDL_WINDOW_BORDERLESS|SDL_WINDOW_MOUSE_FOCUS|SDL_WINDOW_INPUT_FOCUS);
-	if(window==nullptr)
-	{
-		SDL_Log("SDL_CreateWindow failed: %s", SDL_GetError());
-		SDL_Quit();
-		return;
-	}
-	
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
-	if(renderer==nullptr)
-	{
-		SDL_Log("SDL_CreateRenderer failed: %s", SDL_GetError());
-	}
-	
-	SDL_Texture* texture = IMG_LoadTexture(renderer,"./res/example.png");
-	if(texture == nullptr)
-	{
-		SDL_Log("IMG_LoadTexture failed: %s", SDL_GetError());
-	}
-	
-	bool running = true;
-	//text logic
-	TTF_TextEngine *engine = TTF_CreateRendererTextEngine(renderer);
-	if(engine == nullptr)
-	{
-		SDL_Log("TTF_CreateRendererTextEngine failed: %s", SDL_GetError());
-	}
-	TTF_Font *font = TTF_OpenFont("./res/test.ttf", 44.0f);
-		if(font == nullptr)
-	{
-		SDL_Log("TTF_OpenFont failed: %s", SDL_GetError());
-	}
+    FueloData fuelo(42.6977, 23.3219, 5);
+    fuelo.Fetch();
+    std::vector<GasStation> stations = fuelo.ParseStations();
 
-	TTF_Text *text = TTF_CreateText(engine, font, "FUZ", 0);
-	if(text == nullptr)
-	{
-		SDL_Log("IMG_CreateText failed: %s", SDL_GetError());
-	}
-	Text t;
-	t.SetEngine(engine);
-	t.SetPos(600,400);
-	t.SetFont("./res/test.ttf");
-	t.SetSize(44.0f);
-	t.SetText("Hello");
-	SDL_Event event;
-	while(running)
-	{
-		//upadte
-		while(SDL_PollEvent(&event))
-		{
-			if(event.type==SDL_EVENT_QUIT) running = false;
-			if(event.type == SDL_EVENT_KEY_DOWN)
+    if (!SDL_Init(SDL_INIT_VIDEO)) return;
+    if (!TTF_Init()) return;
+
+    SDL_Window* window = SDL_CreateWindow("Fuelo Prices", 800, 600, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
+
+    TTF_Font* font = TTF_OpenFont("./res/font.ttf", 20.0f);
+    if (!font) {
+        SDL_Log("Грешка при зареждане на шрифт: %s", SDL_GetError());
+    }
+
+    bool running = true;
+    SDL_Event event;
+    float scrollOffset = 0.0f;
+
+    while (running)
+    {
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_QUIT) running = false;
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) running = false;
+            if (event.type == SDL_EVENT_MOUSE_WHEEL)
 			{
-				if(event.key.key == SDLK_ESCAPE) running = false;
+				scrollOffset += event.wheel.y * 25.0f; 
+
+				if (scrollOffset > 0.0f) {
+					scrollOffset = 0.0f;
+				}
+
+				float totalContentHeight = stations.size() * 40.0f; 
+				float maxScroll = 600.0f - totalContentHeight - 50.0f; 
+
+				if (totalContentHeight > 600.0f) {
+					if (scrollOffset < maxScroll) {
+						scrollOffset = maxScroll;
+					}
+				} else {
+					scrollOffset = 0.0f;
+				}
 			}
-		}
-		
-		//draw
-		SDL_SetRenderDrawColor(renderer,0,10,0,24);
-		SDL_RenderClear(renderer);
-		//https://wiki.libsdl.org/SDL3/SDL_RenderTexture
-		SDL_FRect dest = {200.0f,100.0f,400.0f,400.0f};
-		SDL_FRect src = {100,100,100,100};
-		SDL_RenderTexture(renderer,texture,&src,&dest);
-		
-		SDL_FRect sq = {300.0f,200.0f,200.0f,200.0f};
-		SDL_SetRenderDrawColor(renderer,100,0,140,24);
-		SDL_RenderFillRect(renderer,&sq);
-		TTF_DrawRendererText(text, 350, 250);
-		t.Draw();
-		SDL_RenderPresent(renderer);
-		
-		
-	}
-	TTF_DestroyText(text);
+        }
+
+        // Изчистване на фона
+        SDL_SetRenderDrawColor(renderer, 20, 20, 30, 255);
+        SDL_RenderClear(renderer);
+
+        float yPos = 30.0f + scrollOffset;
+        SDL_Color textColor = { 255, 255, 255, 255 };
+
+        for (size_t i = 0; i < stations.size(); ++i)
+        {
+            SDL_FRect cardRect = { 20.0f, yPos - 5.0f, 760.0f, 32.0f };
+            SDL_SetRenderDrawColor(renderer, 35, 40, 55, 255);
+            SDL_RenderFillRect(renderer, &cardRect);
+
+            std::string line = stations[i].name + " -> " + stations[i].price;
+
+            SDL_Surface* surface = TTF_RenderText_Blended(font, line.c_str(), 0, textColor);
+            if (surface)
+            {
+                SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+                if (texture)
+                {
+                    SDL_FRect dstRect = { 30.0f, yPos, (float)surface->w, (float)surface->h };
+                    SDL_RenderTexture(renderer, texture, NULL, &dstRect);
+                    SDL_DestroyTexture(texture);
+                }
+                SDL_DestroySurface(surface);
+            }
+
+            yPos += 40.0f; 
+        }
+
+        SDL_RenderPresent(renderer);
+    }
+
     TTF_CloseFont(font);
-    TTF_DestroyRendererTextEngine(engine);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-}
-
-
-
-void start2()
-{
-	Window wi;
-	wi.CreateDefault("",600,600);
-	
-	if(!SDL_Init(SDL_INIT_VIDEO))
-	{
-		SDL_Log("SDL_Init failed: %s", SDL_GetError());
-	}
-	
-	bool running = true;
-	SDL_Event event;
-	SDL_Texture* texture = IMG_LoadTexture(wi.GetSDLRenderer(),"./res/example.png");
-	SDL_SetRenderDrawColor(wi.GetSDLRenderer(),0,10,0,255);
-	SDL_RenderClear(wi.GetSDLRenderer());
-	SDL_FRect dest = {200.0f,100.0f,400.0f,400.0f};
-	SDL_FRect src = {100,100,100,100};
-	SDL_RenderTexture(wi.GetSDLRenderer(),texture,&src,&dest);
-	
-	SDL_FRect sq = {300.0f,200.0f,200.0f,200.0f};
-	SDL_SetRenderDrawColor(wi.GetSDLRenderer(),100,0,140,255);
-	
-	SDL_RenderFillRect(wi.GetSDLRenderer(),&sq);
-	
-	SDL_RenderPresent(wi.GetSDLRenderer());
-	Window wi2;
-	wi2.Copy(&wi);
-	wi2.print();
-	int count;
-	SDL_Window** windows = SDL_GetWindows(&count);
-	std::cout<<count<<"\n";
-	SDL_free(windows);
-	
-	while(running)
-	{
-		//upadte
-		while(SDL_PollEvent(&event))
-		{
-			if(event.type==SDL_EVENT_QUIT) running = false;
-			if(event.type == SDL_EVENT_KEY_DOWN)
-			{
-				if(event.key.key == SDLK_ESCAPE) running = false;
-			}
-		}
-		
-		//draw
-		
-		SDL_RenderPresent(wi.GetSDLRenderer());
-		SDL_RenderPresent(wi2.GetSDLRenderer());
-	}
-	
-	SDL_Quit();
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    TTF_Quit();
+    SDL_Quit();
 }
 
 int main()
 {
-		
-	start();
-	
-	return 0;
+    start();
+    return 0;
 }
